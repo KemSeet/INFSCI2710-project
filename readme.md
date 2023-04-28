@@ -8,9 +8,8 @@ The Gym Management System is a Spring Boot application designed to manage a gym'
 * Provide JSON-formatted output for API endpoints
 
 ## Prerequisites
-* Java 8 or later
-* MySQL (or another supported relational database)
-* Maven (optional, for building the project)
+* Java 8
+* MySQL
 
 ## Getting Started
 * Clone the repository
