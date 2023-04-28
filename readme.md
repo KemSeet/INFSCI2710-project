@@ -14,7 +14,7 @@ The Gym Management System is a Spring Boot application designed to manage a gym'
 
 ## Getting Started
 * Clone the repository
-  git clone https://github.com/yourusername/gym-management-system.git
+  - git clone https://github.com/yourusername/gym-management-system.git
 * Run FitnessApplication.java
 * The application should now be running at http://localhost:8080.
 
