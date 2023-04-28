@@ -1,5 +1,21 @@
-1.通过Mysql Workbench数据库可视化工具新建一个xil402数据库;
-2.把项目db文件下的Fitness_center_management_system.sql文件导入到xil402数据库新建数据表格;
-3.修改项目application.properties配置文件中的链接数据库url,username,password等属性;
-4.运行SpringBoot启动类FitnessApplication;
-5.浏览器中打开localhost:8080
+#Fitness Center Management System
+The Gym Management System is a Spring Boot application designed to manage a gym's customer, employee, and service data. It includes features to manage memberships, transactions, schedules, and more. The application provides a RESTful API to interact with the underlying database, allowing for easy integration with various clients.
+
+##Features
+*Store and manage customer, employee, service, schedule, transaction, payment, membership, invoice, and payment method data
+*Perform CRUD operations on the database tables
+*Expose a RESTful API for data retrieval and manipulation
+*Provide JSON-formatted output for API endpoints
+
+##Prerequisites
+*Java 8 or later
+*MySQL (or another supported relational database)
+*Maven (optional, for building the project)
+
+##Getting Started
+*Clone the repository
+ git clone https://github.com/yourusername/gym-management-system.git
+*Run FitnessApplication.java
+*The application should now be running at http://localhost:8080.
+
+
