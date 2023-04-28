@@ -18,4 +18,21 @@ The Gym Management System is a Spring Boot application designed to manage a gym'
 * Run FitnessApplication.java
 * The application should now be running at http://localhost:8080.
 
+## Application Layout & Functions
+* Show customers
 
+  ![Alt text](./image/customers.png)
+
+* Show positions
+
+  ![Alt text](./image/positions.png)
+  
+* Show employees
+
+  ![Alt text](./image/employees.png)
+  
+* Search/Add/Delete/Update
+  - **Search**: search for certain name, phone number, email or position
+  - **Add**: add a customer, position or employee
+  - **Delete**: delete a customer, position or employee
+  - **Update**: update a customer, position or employee
