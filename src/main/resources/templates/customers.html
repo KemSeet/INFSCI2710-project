@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Customers Information</title>
+    <link rel="stylesheet" href="static/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="static/css/global.css" media="all">
+    <link rel="stylesheet" type="text/css" href="http://www.jq22.com/jquery/font-awesome.4.6.0.css">
+    <link rel="stylesheet" href="static/css/table.css"/>
+</head>
+
+<body>
+<div class="admin-main">
+
+    <blockquote class="layui-elem-quote">
+        <input id="name" style="width: auto;display: unset" type="text" name="title" lay-verify="title"
+               autocomplete="off" placeholder="Please fill in name" class="layui-input">
+        <input id="phone" style="width: auto;display: unset" type="text" name="title" lay-verify="title"
+               autocomplete="off" placeholder="Please fill in phone" class="layui-input">
+        <input id="email" style="width: auto;display: unset" type="text" name="title" lay-verify="title"
+               autocomplete="off" placeholder="Please fill in email" class="layui-input">
+        <a href="javascript:;" class="layui-btn layui-btn-small" id="search">
+            <i class="layui-icon">&#xe615;</i> Search
+        </a>
+        <a href="javascript:;" class="layui-btn layui-btn-small" id="add">
+            <i class="layui-icon">&#xe608;</i> Add
+        </a>
+    </blockquote>
+    <fieldset class="layui-elem-field">
+        <div class="layui-field-box">
+            <table class="site-table table-hover" id="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Gender</th>
+                    <th>Birth</th>
+                    <th>JoinDate</th>
+                    <th>Type</th>
+                    <th>Operate</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+    <div class="admin-table-page">
+        <div id="page" class="page">
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="static/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: 'static/layui/modules/'
+    });
+
+    var updateRow = function (id, obj) {
+        layui.jquery.get('edit-customers', null, function (form) {
+            layui.jquery.ajax({
+                url: '/customers/selectById',
+                type: 'POST',
+                dataType: "json",
+                data: {"id": id},
+                success: function (data) {
+                    if (data.result) {
+                        layui.jquery('#input-name').val(data.datas.name)
+                        layui.jquery('#input-email').val(data.datas.email)
+                        layui.jquery('#input-phone').val(data.datas.phone)
+                        layui.jquery('#input-gender').val(data.datas.gender)
+                        layui.jquery('#input-birth').val(formatDate(data.datas.date_of_birth))
+                        layui.jquery('#input-type').val(data.datas.memberShip_type)
+                    } else {
+                        layer.alert(data.message, {title: 'Error', btn: ['close']})
+                    }
+                }
+            });
+            layui.layer.open({
+                type: 1,
+                title: 'Update Customer',
+                content: form,
+                btn: ['Update', 'Close'],
+                area: ['300px', '550px'],
+                maxmin: true,
+                yes: function (index, layero) {
+                    var name = layui.jquery.trim(layui.jquery(layero).find('#input-name').val());
+                    var email = layui.jquery.trim(layui.jquery(layero).find('#input-email').val());
+                    var phone = layui.jquery.trim(layui.jquery(layero).find('#input-phone').val());
+                    var gender = layui.jquery.trim(layui.jquery(layero).find('#input-gender').val());
+                    var birth = layui.jquery.trim(layui.jquery(layero).find('#input-birth').val());
+                    var type = layui.jquery.trim(layui.jquery(layero).find('#input-type').val());
+                    if (name === "") {
+                        layer.alert("Please fill in Name", {title: 'Message', btn: ['close']})
+                        return
+                    } else if (email === "") {
+                        layer.alert("Please fill in Email", {title: 'Message', btn: ['close']})
+                        return
+                    } else if (phone === "") {
+                        layer.alert("Please fill in Phone", {title: 'Message', btn: ['close']})
+                        return
+                    } else if (birth === "") {
+                        layer.alert("Please fill in Birth", {title: 'Message', btn: ['close']})
+                        return
+                    }
+                    layui.jquery.ajax({
+                        url: '/customers/update',
+                        type: 'POST',
+                        dataType: "json",
+                        data: {
+                            "customer_id": id,
+                            "name": name,
+                            "email": email,
+                            "phone": phone,
+                            "gender": gender,
+                            "date_of_birth": birth,
+                            "memberShip_type": type
+                        },
+                        success: function (data) {
+                            if (data.result) {
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(0).text(data.datas.name);
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(1).text(data.datas.email);
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(2).text(data.datas.phone);
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(3).text(data.datas.gender);
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(4).text(formatDate(data.datas.date_of_birth));
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(6).text(data.datas.memberShip_type);
+                                layer.close(index)
+                            } else {
+                                layer.alert(data.message, {title: 'Message', btn: ['close']})
+                            }
+                        }
+                    });
+                },
+                full: function (elem) {
+                    var win = window.top === window.self ? window : parent.window;
+                    $(win).on('resize', function () {
+                        var $this = $(this);
+                        elem.width($this.width()).height($this.height()).css({
+                            top: 0,
+                            left: 0
+                        });
+                        elem.children('div.layui-layer-content').height($this.height() - 95);
+                    });
+                }
+            });
+        });
+    };
+
+
+    var removeRow = function (id, obj) {
+        layer.confirm('Confirm deletion?', {
+            title: "Confirm",
+            btn: ['Delete', 'Close']
+        }, function (index) {
+            layui.jquery.ajax({
+                url: '/customers/delete',
+                type: 'POST',
+                dataType: "json",
+                data: {"id": id},
+                success: function (data) {
+                    if (data.result) {
+                        layui.jquery(obj).parents("tr").remove();
+                        layer.close(index);
+                    } else {
+                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                    }
+                }
+            });
+        }, function (index) {
+            layer.close(index);
+        });
+    };
+
+    function formatDate(time) {
+        var date = new Date(time);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    }
+
+    layui.use(['icheck', 'laypage', 'layer'], function () {
+        var $ = layui.jquery,
+            laypage = layui.laypage,
+            layer = parent.layer === undefined ? layui.layer : parent.layer
+
+
+        var loadData = function (currPage, name, email, phone) {
+            $.ajax({
+                url: '/customers/list',
+                type: 'POST',
+                dataType: "json",
+                data: {"start": currPage, "name": name, "email": email, "phone": phone},
+                success: function (data) {
+                    if (data.result) {
+                        $('#table tbody').html('');
+                        $.each(data.datas.list, function (i, v) {
+                            var html = '<tr>' +
+                                '<td>' + v.name + '</td>' +
+                                '<td>' + v.email + '</td>' +
+                                '<td>' + v.phone + '</td>' +
+                                '<td>' + v.gender + '</td>' +
+                                '<td>' + formatDate(v.date_of_birth) + '</td>' +
+                                '<td>' + formatDate(v.join_date) + '</td>' +
+                                '<td>' + v.memberShip_type + '</td>';
+                            html +=
+                                '<td>' +
+                                '<a class="layui-btn layui-btn-xs update" style="height: 30px;line-height: 30px" onclick="updateRow(' + v.customer_id + ',this)">Update</a>&nbsp;' +
+                                '<a class="layui-btn layui-btn-danger layui-btn-xs del" style="height: 30px;line-height: 30px" onclick="removeRow(' + v.customer_id + ',this)">Delete</a>' +
+                                '</td>' +
+                                '</tr>';
+                            $(html).appendTo($('#table tbody:last'));
+                        });
+                        //page
+                        laypage({
+                            cont: 'page',
+                            pages: data.datas.pages,
+                            groups: 5,
+                            curr: currPage,
+                            jump: function (obj, first) {
+                                if (!first) loadData(obj.curr, $('#name').val(), $('#email').val(), $('#phone').val());
+                            }
+                        });
+                    } else {
+                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                    }
+                }
+            });
+        };
+
+        loadData(1, $('#name').val(), $('#email').val(), $('#phone').val());
+
+        $('#search').on('click', function () {
+            loadData(1, $('#name').val(), $('#email').val(), $('#phone').val());
+        });
+
+        $('#add').on('click', function () {
+            $.get('edit-customers', null, function (form) {
+                layer.open({
+                    type: 1,
+                    title: 'Add Customer',
+                    content: form,
+                    btn: ['Save', 'Close'],
+                    area: ['350px', '550px'],
+                    maxmin: true,
+                    yes: function (index, layero) {
+                        var name = $.trim($(layero).find('#input-name').val());
+                        var email = $.trim($(layero).find('#input-email').val());
+                        var phone = $.trim($(layero).find('#input-phone').val());
+                        var gender = $.trim($(layero).find('#input-gender').val());
+                        var birth = $.trim($(layero).find('#input-birth').val());
+                        var type = $.trim($(layero).find('#input-type').val());
+                        if (name === "") {
+                            layer.alert("Please fill in Name", {title: 'Message', btn: ['close']})
+                        } else if (email === "") {
+                            layer.alert("Please fill in Email", {title: 'Message', btn: ['close']})
+                        } else if (phone === "") {
+                            layer.alert("Please fill in Phone", {title: 'Message', btn: ['close']})
+                        } else if (birth === "") {
+                            layer.alert("Please fill in Birth", {title: 'Message', btn: ['close']})
+                        } else {
+                            $.ajax({
+                                url: '/customers/save',
+                                type: 'POST',
+                                dataType: "json",
+                                data: {
+                                    "name": name,
+                                    "email": email,
+                                    "phone": phone,
+                                    "gender": gender,
+                                    "date_of_birth": birth,
+                                    "memberShip_type": type
+                                },
+                                success: function (data) {
+                                    if (data.result) {
+                                        var html = '<tr>' +
+                                            '<td>' + data.datas.name + '</td>' +
+                                            '<td>' + data.datas.email + '</td>' +
+                                            '<td>' + data.datas.phone + '</td>' +
+                                            '<td>' + data.datas.gender + '</td>' +
+                                            '<td>' + formatDate(data.datas.date_of_birth) + '</td>' +
+                                            '<td>' + formatDate(data.datas.join_date) + '</td>' +
+                                            '<td>' + data.datas.memberShip_type + '</td>';
+
+                                        html += '<td>' +
+                                            '<a class="layui-btn layui-btn-xs update" style="height: 30px;line-height: 30px" onclick="updateRow(\'' + data.datas.customer_id + '\',this)">Update</a>&nbsp;' +
+                                            '<a class="layui-btn layui-btn-danger layui-btn-xs del" style="height: 30px;line-height: 30px" onclick="removeRow(\'' + data.datas.customer_id + '\',this)">Delete</a>&nbsp;';
+                                        html += '</td>' +
+                                            '</tr>';
+                                        //添加到表格最后
+                                        $(html).appendTo($('#table tbody:last'));
+                                        layer.close(index)
+                                    } else {
+                                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    full: function (elem) {
+                        var win = window.top === window.self ? window : parent.window;
+                        $(win).on('resize', function () {
+                            var $this = $(this);
+                            elem.width($this.width()).height($this.height()).css({
+                                top: 0,
+                                left: 0
+                            });
+                            elem.children('div.layui-layer-content').height($this.height() - 95);
+                        });
+                    }
+                });
+            });
+        });
+
+    });
+</script>
+</body>
+
+</html>

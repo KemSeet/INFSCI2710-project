@@ -1,0 +1,58 @@
+<form class="layui-form" action="">
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Name</label>
+        <div class="layui-input-block">
+            <input type="text" id="input-name" placeholder="Please fill in Name" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Email</label>
+        <div class="layui-input-block">
+            <input type="text" id="input-email" placeholder="Please fill in Email" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Phone</label>
+        <div class="layui-input-block">
+            <input type="text" id="input-phone" placeholder="Please fill in Phone" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Gender</label>
+        <div class="layui-input-block">
+            <select name="input-gender" id="input-gender">
+                <option value="M">M</option>
+                <option value="F">F</option>
+                <option value="O">O</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Birth</label>
+        <div class="layui-input-block">
+            <input type="date" id="input-birth" placeholder="Please fill in Birth" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Type</label>
+        <div class="layui-input-block">
+            <select name="input-type" id="input-type">
+                <option value="Bronze">Bronze</option>
+                <option value="Silver">Silver</option>
+                <option value="Gold">Gold</option>
+                <option value="Platinum">Platinum</option>
+            </select>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function() {
+        var form = layui.form()
+
+        setTimeout(function () {
+            form.render()
+        }, 300)
+
+    });
+</script>

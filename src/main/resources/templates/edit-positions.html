@@ -1,0 +1,19 @@
+<form class="layui-form" action="">
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Name</label>
+        <div class="layui-input-block">
+            <input type="text" id="input-name" placeholder="Please fill in Name" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function() {
+        var form = layui.form()
+
+        setTimeout(function () {
+            form.render()
+        }, 300)
+
+    });
+</script>

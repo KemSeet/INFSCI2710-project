@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Positions Information</title>
+    <link rel="stylesheet" href="static/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="static/css/global.css" media="all">
+    <link rel="stylesheet" type="text/css" href="http://www.jq22.com/jquery/font-awesome.4.6.0.css">
+    <link rel="stylesheet" href="static/css/table.css"/>
+</head>
+
+<body>
+<div class="admin-main">
+
+    <blockquote class="layui-elem-quote">
+        <input id="name" style="width: auto;display: unset" type="text" name="title" lay-verify="title"
+               autocomplete="off" placeholder="Please fill in name" class="layui-input">
+        <a href="javascript:;" class="layui-btn layui-btn-small" id="search">
+            <i class="layui-icon">&#xe615;</i> Search
+        </a>
+        <a href="javascript:;" class="layui-btn layui-btn-small" id="add">
+            <i class="layui-icon">&#xe608;</i> Add
+        </a>
+    </blockquote>
+    <fieldset class="layui-elem-field">
+        <div class="layui-field-box">
+            <table class="site-table table-hover" id="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Operate</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+    <div class="admin-table-page">
+        <div id="page" class="page">
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="static/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: 'static/layui/modules/'
+    });
+
+    var updateRow = function (id, obj) {
+        layui.jquery.get('edit-positions', null, function (form) {
+            layui.jquery.ajax({
+                url: '/positions/selectById',
+                type: 'POST',
+                dataType: "json",
+                data: {"id": id},
+                success: function (data) {
+                    if (data.result) {
+                        layui.jquery('#input-name').val(data.datas.name)
+                    } else {
+                        layer.alert(data.message, {title: 'Error', btn: ['close']})
+                    }
+                }
+            });
+            layui.layer.open({
+                type: 1,
+                title: 'Update Position',
+                content: form,
+                btn: ['Update', 'Close'],
+                area: ['300px', '180px'],
+                maxmin: true,
+                yes: function (index, layero) {
+                    var name = layui.jquery.trim(layui.jquery(layero).find('#input-name').val());
+                    if (name === "") {
+                        layer.alert("Please fill in Name", {title: 'Message', btn: ['close']})
+                        return
+                    }
+                    layui.jquery.ajax({
+                        url: '/positions/update',
+                        type: 'POST',
+                        dataType: "json",
+                        data: {
+                            "position_id": id,
+                            "name": name,
+                        },
+                        success: function (data) {
+                            if (data.result) {
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(0).text(data.datas.name);
+                                layer.close(index)
+                            } else {
+                                layer.alert(data.message, {title: 'Message', btn: ['close']})
+                            }
+                        }
+                    });
+                },
+                full: function (elem) {
+                    var win = window.top === window.self ? window : parent.window;
+                    $(win).on('resize', function () {
+                        var $this = $(this);
+                        elem.width($this.width()).height($this.height()).css({
+                            top: 0,
+                            left: 0
+                        });
+                        elem.children('div.layui-layer-content').height($this.height() - 95);
+                    });
+                }
+            });
+        });
+    };
+
+
+    var removeRow = function (id, obj) {
+        layer.confirm('Confirm deletion?', {
+            title: "Confirm",
+            btn: ['Delete', 'Close']
+        }, function (index) {
+            layui.jquery.ajax({
+                url: '/positions/delete',
+                type: 'POST',
+                dataType: "json",
+                data: {"id": id},
+                success: function (data) {
+                    if (data.result) {
+                        layui.jquery(obj).parents("tr").remove();
+                        layer.close(index);
+                    } else {
+                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                    }
+                }
+            });
+        }, function (index) {
+            layer.close(index);
+        });
+    };
+
+    layui.use(['icheck', 'laypage', 'layer'], function () {
+        var $ = layui.jquery,
+            laypage = layui.laypage,
+            layer = parent.layer === undefined ? layui.layer : parent.layer
+
+
+        var loadData = function (currPage, name) {
+            $.ajax({
+                url: '/positions/list',
+                type: 'POST',
+                dataType: "json",
+                data: {"start": currPage, "name": name},
+                success: function (data) {
+                    if (data.result) {
+                        $('#table tbody').html('');
+                        $.each(data.datas.list, function (i, v) {
+                            var html = '<tr>' +
+                                '<td>' + v.name + '</td>';
+                            html +=
+                                '<td>' +
+                                '<a class="layui-btn layui-btn-xs update" style="height: 30px;line-height: 30px" onclick="updateRow(' + v.position_id + ',this)">Update</a>&nbsp;' +
+                                '<a class="layui-btn layui-btn-danger layui-btn-xs del" style="height: 30px;line-height: 30px" onclick="removeRow(' + v.position_id + ',this)">Delete</a>' +
+                                '</td>' +
+                                '</tr>';
+                            $(html).appendTo($('#table tbody:last'));
+                        });
+                        //page
+                        laypage({
+                            cont: 'page',
+                            pages: data.datas.pages,
+                            groups: 5,
+                            curr: currPage,
+                            jump: function (obj, first) {
+                                if (!first) loadData(obj.curr, $('#name').val());
+                            }
+                        });
+                    } else {
+                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                    }
+                }
+            });
+        };
+
+        loadData(1, $('#name').val());
+
+        $('#search').on('click', function () {
+            loadData(1, $('#name').val());
+        });
+
+        $('#add').on('click', function () {
+            $.get('edit-positions', null, function (form) {
+                layer.open({
+                    type: 1,
+                    title: 'Add Position',
+                    content: form,
+                    btn: ['Save', 'Close'],
+                    area: ['350px', '180px'],
+                    maxmin: true,
+                    yes: function (index, layero) {
+                        var name = $.trim($(layero).find('#input-name').val())
+                        if (name === "") {
+                            layer.alert("Please fill in Name", {title: 'Message', btn: ['close']})
+                        } else {
+                            $.ajax({
+                                url: '/positions/save',
+                                type: 'POST',
+                                dataType: "json",
+                                data: {
+                                    "name": name,
+                                },
+                                success: function (data) {
+                                    if (data.result) {
+                                        var html = '<tr>' +
+                                            '<td>' + data.datas.name + '</td>';
+
+                                        html += '<td>' +
+                                            '<a class="layui-btn layui-btn-xs update" style="height: 30px;line-height: 30px" onclick="updateRow(\'' + data.datas.position_id + '\',this)">Update</a>&nbsp;' +
+                                            '<a class="layui-btn layui-btn-danger layui-btn-xs del" style="height: 30px;line-height: 30px" onclick="removeRow(\'' + data.datas.position_id + '\',this)">Delete</a>&nbsp;';
+                                        html += '</td>' +
+                                            '</tr>';
+                                        //添加到表格最后
+                                        $(html).appendTo($('#table tbody:last'));
+                                        layer.close(index)
+                                    } else {
+                                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    full: function (elem) {
+                        var win = window.top === window.self ? window : parent.window;
+                        $(win).on('resize', function () {
+                            var $this = $(this);
+                            elem.width($this.width()).height($this.height()).css({
+                                top: 0,
+                                left: 0
+                            });
+                            elem.children('div.layui-layer-content').height($this.height() - 95);
+                        });
+                    }
+                });
+            });
+        });
+
+    });
+</script>
+</body>
+
+</html>

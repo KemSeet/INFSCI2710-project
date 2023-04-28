@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Employees Information</title>
+    <link rel="stylesheet" href="static/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="static/css/global.css" media="all">
+    <link rel="stylesheet" type="text/css" href="http://www.jq22.com/jquery/font-awesome.4.6.0.css">
+    <link rel="stylesheet" href="static/css/table.css"/>
+</head>
+
+<body>
+<div class="admin-main">
+    <input id="input-id" value="0" hidden>
+    <blockquote class="layui-elem-quote">
+        <input id="name" style="width: auto;display: unset" type="text" name="title" lay-verify="title"
+               autocomplete="off" placeholder="Please fill in name" class="layui-input">
+        <input id="phone" style="width: auto;display: unset" type="text" name="title" lay-verify="title"
+               autocomplete="off" placeholder="Please fill in phone" class="layui-input">
+        <input id="email" style="width: auto;display: unset" type="text" name="title" lay-verify="title"
+               autocomplete="off" placeholder="Please fill in email" class="layui-input">
+        <a href="javascript:;" class="layui-btn layui-btn-small" id="search">
+            <i class="layui-icon">&#xe615;</i> Search
+        </a>
+        <a href="javascript:;" class="layui-btn layui-btn-small" id="add">
+            <i class="layui-icon">&#xe608;</i> Add
+        </a>
+    </blockquote>
+    <fieldset class="layui-elem-field">
+        <div class="layui-field-box">
+            <table class="site-table table-hover" id="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Gender</th>
+                    <th>Birth</th>
+                    <th>HireDate</th>
+                    <th>Position</th>
+                    <th>Salary</th>
+                    <th>Operate</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+    <div class="admin-table-page">
+        <div id="page" class="page">
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="static/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: 'static/layui/modules/'
+    });
+
+    var updateRow = function (id, obj) {
+        layui.jquery('#input-id').val(id);
+        layui.jquery.get('edit-employees', null, function (form) {
+            layui.layer.open({
+                type: 1,
+                title: 'Update Employee',
+                content: form,
+                btn: ['Update', 'Close'],
+                area: ['300px', '650px'],
+                maxmin: true,
+                yes: function (index, layero) {
+                    var name = layui.jquery.trim(layui.jquery(layero).find('#input-name').val());
+                    var email = layui.jquery.trim(layui.jquery(layero).find('#input-email').val());
+                    var phone = layui.jquery.trim(layui.jquery(layero).find('#input-phone').val());
+                    var gender = layui.jquery.trim(layui.jquery(layero).find('#input-gender').val());
+                    var birth = layui.jquery.trim(layui.jquery(layero).find('#input-birth').val());
+                    var hire = layui.jquery.trim(layui.jquery(layero).find('#input-hire').val());
+                    var position = layui.jquery.trim(layui.jquery(layero).find('#input-position').val());
+                    var salary = layui.jquery.trim(layui.jquery(layero).find('#input-salary').val());
+                    if (name === "") {
+                        layer.alert("Please fill in Name", {title: 'Message', btn: ['close']})
+                        return
+                    } else if (email === "") {
+                        layer.alert("Please fill in Email", {title: 'Message', btn: ['close']})
+                        return
+                    } else if (phone === "") {
+                        layer.alert("Please fill in Phone", {title: 'Message', btn: ['close']})
+                        return
+                    } else if (birth === "") {
+                        layer.alert("Please fill in Birth", {title: 'Message', btn: ['close']})
+                        return
+                    } else if (hire === "") {
+                        layer.alert("Please fill in HireDate", {title: 'Message', btn: ['close']})
+                        return
+                    } else if (position === "") {
+                        layer.alert("Please fill in Position", {title: 'Message', btn: ['close']})
+                        return
+                    } else if (salary === "") {
+                        layer.alert("Please fill in Salary", {title: 'Message', btn: ['close']})
+                        return
+                    }
+                    layui.jquery.ajax({
+                        url: '/employees/update',
+                        type: 'POST',
+                        dataType: "json",
+                        data: {
+                            "employee_id": id,
+                            "name": name,
+                            "email": email,
+                            "phone": phone,
+                            "gender": gender,
+                            "date_of_birth": birth,
+                            "hire_date": hire,
+                            "position": position,
+                            "salary": salary
+                        },
+                        success: function (data) {
+                            if (data.result) {
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(0).text(data.datas.name);
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(1).text(data.datas.email);
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(2).text(data.datas.phone);
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(3).text(data.datas.gender);
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(4).text(formatDate(data.datas.date_of_birth));
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(5).text(formatDate(data.datas.hire_date));
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(6).text(data.datas.positions.name);
+                                layui.jquery(layui.jquery(obj).parents("tr")).find("td").eq(7).text(data.datas.salary);
+                                layer.close(index)
+                            } else {
+                                layer.alert(data.message, {title: 'Message', btn: ['close']})
+                            }
+                        }
+                    });
+                },
+                full: function (elem) {
+                    var win = window.top === window.self ? window : parent.window;
+                    $(win).on('resize', function () {
+                        var $this = $(this);
+                        elem.width($this.width()).height($this.height()).css({
+                            top: 0,
+                            left: 0
+                        });
+                        elem.children('div.layui-layer-content').height($this.height() - 95);
+                    });
+                }
+            });
+        });
+    };
+
+
+    var removeRow = function (id, obj) {
+        layer.confirm('Confirm deletion?', {
+            title: "Confirm",
+            btn: ['Delete', 'Close']
+        }, function (index) {
+            layui.jquery.ajax({
+                url: '/employees/delete',
+                type: 'POST',
+                dataType: "json",
+                data: {"id": id},
+                success: function (data) {
+                    if (data.result) {
+                        layui.jquery(obj).parents("tr").remove();
+                        layer.close(index);
+                    } else {
+                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                    }
+                }
+            });
+        }, function (index) {
+            layer.close(index);
+        });
+    };
+
+    function formatDate(time) {
+        var date = new Date(time);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    }
+
+    layui.use(['icheck', 'laypage', 'layer'], function () {
+        var $ = layui.jquery,
+            laypage = layui.laypage,
+            layer = parent.layer === undefined ? layui.layer : parent.layer
+
+
+        var loadData = function (currPage, name, email, phone) {
+            $.ajax({
+                url: '/employees/list',
+                type: 'POST',
+                dataType: "json",
+                data: {"start": currPage, "name": name, "email": email, "phone": phone},
+                success: function (data) {
+                    if (data.result) {
+                        $('#table tbody').html('');
+                        $.each(data.datas.list, function (i, v) {
+                            var html = '<tr>' +
+                                '<td>' + v.name + '</td>' +
+                                '<td>' + v.email + '</td>' +
+                                '<td>' + v.phone + '</td>' +
+                                '<td>' + v.gender + '</td>' +
+                                '<td>' + formatDate(v.date_of_birth) + '</td>' +
+                                '<td>' + formatDate(v.hire_date) + '</td>' +
+                                '<td>' + v.positions.name + '</td>' +
+                                '<td>' + v.salary + '</td>';
+                            html +=
+                                '<td>' +
+                                '<a class="layui-btn layui-btn-xs update" style="height: 30px;line-height: 30px" onclick="updateRow(' + v.employee_id + ',this)">Update</a>&nbsp;' +
+                                '<a class="layui-btn layui-btn-danger layui-btn-xs del" style="height: 30px;line-height: 30px" onclick="removeRow(' + v.employee_id + ',this)">Delete</a>' +
+                                '</td>' +
+                                '</tr>';
+                            $(html).appendTo($('#table tbody:last'));
+                        });
+                        //page
+                        laypage({
+                            cont: 'page',
+                            pages: data.datas.pages,
+                            groups: 5,
+                            curr: currPage,
+                            jump: function (obj, first) {
+                                if (!first) loadData(obj.curr, $('#name').val(), $('#email').val(), $('#phone').val());
+                            }
+                        });
+                    } else {
+                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                    }
+                }
+            });
+        };
+
+        loadData(1, $('#name').val(), $('#email').val(), $('#phone').val());
+
+        $('#search').on('click', function () {
+            loadData(1, $('#name').val(), $('#email').val(), $('#phone').val());
+        });
+
+        $('#add').on('click', function () {
+            layui.jquery('#input-id').val(0);
+            $.get('edit-employees', null, function (form) {
+                layer.open({
+                    type: 1,
+                    title: 'Add Employee',
+                    content: form,
+                    btn: ['Save', 'Close'],
+                    area: ['350px', '650px'],
+                    maxmin: true,
+                    yes: function (index, layero) {
+                        var name = $.trim($(layero).find('#input-name').val());
+                        var email = $.trim($(layero).find('#input-email').val());
+                        var phone = $.trim($(layero).find('#input-phone').val());
+                        var gender = $.trim($(layero).find('#input-gender').val());
+                        var birth = $.trim($(layero).find('#input-birth').val());
+                        var hire = $.trim($(layero).find('#input-hire').val());
+                        var position = $.trim($(layero).find('#input-position').val());
+                        var salary = $.trim($(layero).find('#input-salary').val());
+                        if (name === "") {
+                            layer.alert("Please fill in Name", {title: 'Message', btn: ['close']})
+                        } else if (email === "") {
+                            layer.alert("Please fill in Email", {title: 'Message', btn: ['close']})
+                        } else if (phone === "") {
+                            layer.alert("Please fill in Phone", {title: 'Message', btn: ['close']})
+                        } else if (birth === "") {
+                            layer.alert("Please fill in Birth", {title: 'Message', btn: ['close']})
+                        } else if (hire === "") {
+                            layer.alert("Please fill in HireDate", {title: 'Message', btn: ['close']})
+                        } else if (position === "") {
+                            layer.alert("Please fill in Position", {title: 'Message', btn: ['close']})
+                        } else if (salary === "") {
+                            layer.alert("Please fill in Salary", {title: 'Message', btn: ['close']})
+                        } else {
+                            $.ajax({
+                                url: '/employees/save',
+                                type: 'POST',
+                                dataType: "json",
+                                data: {
+                                    "name": name,
+                                    "email": email,
+                                    "phone": phone,
+                                    "gender": gender,
+                                    "date_of_birth": birth,
+                                    "hire_date": hire,
+                                    "position": position,
+                                    "salary": salary
+                                },
+                                success: function (data) {
+                                    if (data.result) {
+                                        var html = '<tr>' +
+                                            '<td>' + data.datas.name + '</td>' +
+                                            '<td>' + data.datas.email + '</td>' +
+                                            '<td>' + data.datas.phone + '</td>' +
+                                            '<td>' + data.datas.gender + '</td>' +
+                                            '<td>' + formatDate(data.datas.date_of_birth) + '</td>' +
+                                            '<td>' + formatDate(data.datas.hire_date) + '</td>' +
+                                            '<td>' + data.datas.positions.name + '</td>' +
+                                            '<td>' + data.datas.salary + '</td>';
+
+                                        html += '<td>' +
+                                            '<a class="layui-btn layui-btn-xs update" style="height: 30px;line-height: 30px" onclick="updateRow(\'' + data.datas.employee_id + '\',this)">Update</a>&nbsp;' +
+                                            '<a class="layui-btn layui-btn-danger layui-btn-xs del" style="height: 30px;line-height: 30px" onclick="removeRow(\'' + data.datas.employee_id + '\',this)">Delete</a>&nbsp;';
+                                        html += '</td>' +
+                                            '</tr>';
+                                        //添加到表格最后
+                                        $(html).appendTo($('#table tbody:last'));
+                                        layer.close(index)
+                                    } else {
+                                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    full: function (elem) {
+                        var win = window.top === window.self ? window : parent.window;
+                        $(win).on('resize', function () {
+                            var $this = $(this);
+                            elem.width($this.width()).height($this.height()).css({
+                                top: 0,
+                                left: 0
+                            });
+                            elem.children('div.layui-layer-content').height($this.height() - 95);
+                        });
+                    }
+                });
+            });
+        });
+
+    });
+</script>
+</body>
+
+</html>

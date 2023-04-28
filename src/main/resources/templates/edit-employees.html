@@ -1,0 +1,127 @@
+<form class="layui-form" action="">
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Name</label>
+        <div class="layui-input-block">
+            <input type="text" id="input-name" placeholder="Please fill in Name" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Email</label>
+        <div class="layui-input-block">
+            <input type="text" id="input-email" placeholder="Please fill in Email" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Phone</label>
+        <div class="layui-input-block">
+            <input type="text" id="input-phone" placeholder="Please fill in Phone" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Gender</label>
+        <div class="layui-input-block">
+            <select name="input-gender" id="input-gender">
+                <option value="M">M</option>
+                <option value="F">F</option>
+                <option value="O">O</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Birth</label>
+        <div class="layui-input-block">
+            <input type="date" id="input-birth" placeholder="Please fill in Birth" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">HireDate</label>
+        <div class="layui-input-block">
+            <input type="date" id="input-hire" placeholder="Please fill in HireDate" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Position</label>
+        <div class="layui-input-block">
+            <select name="input-position" id="input-position">
+                <option value=""></option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item" style="padding: 5px 10px 5px 0;">
+        <label class="layui-form-label">Salary</label>
+        <div class="layui-input-block">
+            <input type="number" id="input-salary" placeholder="Please fill in Salary" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function() {
+        var form = layui.form()
+
+        function formatDate(time) {
+            var date = new Date(time);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        }
+
+        function loadPositions() {
+            layui.jquery.ajax({
+                url: '/positions/list',
+                type: 'POST',
+                dataType: "json",
+                data: {"start": 1, "pageSize": 99999999, "name":""},
+                success: function (data) {
+                    if (data.result) {
+                        var optionstring = "";
+                        layui.jquery.each(data.datas.list, function (i, v) {
+                            optionstring += "<option value=" + v.position_id + " >" + v.name + "</option>";
+                        });
+                        layui.jquery("#input-position").html(optionstring);
+                        form.render()
+
+                        if (layui.jquery("#input-id").val() > 0) {
+                            layui.jquery.ajax({
+                                url: '/employees/selectById',
+                                type: 'POST',
+                                dataType: "json",
+                                data: {"id": layui.jquery("#input-id").val()},
+                                success: function (data) {
+                                    if (data.result) {
+                                        layui.jquery('#input-name').val(data.datas.name)
+                                        layui.jquery('#input-email').val(data.datas.email)
+                                        layui.jquery('#input-phone').val(data.datas.phone)
+                                        layui.jquery('#input-gender').val(data.datas.gender)
+                                        layui.jquery('#input-birth').val(formatDate(data.datas.date_of_birth))
+                                        layui.jquery('#input-hire').val(formatDate(data.datas.hire_date))
+                                        layui.jquery('#input-position').val(data.datas.positions.position_id)
+                                        layui.jquery('#input-salary').val(data.datas.salary)
+
+                                        setTimeout(function () {
+                                            form.render()
+                                        }, 300)
+                                    } else {
+                                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                                        form.render()
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        layer.alert(data.message, {title: 'Message', btn: ['close']})
+                        form.render()
+                    }
+                }
+            });
+        }
+
+        loadPositions()
+
+        setTimeout(function () {
+            form.render()
+        }, 300)
+
+    });
+</script>
