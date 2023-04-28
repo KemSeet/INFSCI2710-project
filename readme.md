@@ -10,6 +10,7 @@ The Gym Management System is a Spring Boot application designed to manage a gym'
 ## Prerequisites
 * Java 8
 * MySQL
+* Intellij IDEA
 
 ## Getting Started
 * Clone the repository
